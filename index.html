@@ -2,693 +2,288 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title id="page-title">Cổng Thanh Toán An Toàn</title>
-    <link id="favicon" rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đinh Trường</title>
     
-    <!-- Thư viện html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Favicon (Icon trên tab trình duyệt) -->
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/295/295118.png">
+    <!-- Liên kết tới file Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2c3e50">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
-
-        :root {
-            --bg-main: #090d16;
-            --card-bg: rgba(18, 26, 43, 0.75);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.35);
-            --accent: #6366f1;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --success: #10b981;
-            --success-bg: rgba(16, 185, 129, 0.12);
-        }
-
-        * {
-            box-sizing: border-box;
+        body, html {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100dvh;
-            overflow-x: hidden;
-            padding: 16px;
-            position: relative;
-            text-rendering: geometricPrecision;
-            -webkit-font-smoothing: antialiased;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: #f5f6fa;
         }
 
-        /* Ambient Glow Background Effects */
-        .ambient-glow {
+        .menu-btn {
             position: fixed;
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            filter: blur(90px);
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.5;
-        }
-        .glow-1 { top: -60px; left: -60px; background: #6366f1; }
-        .glow-2 { bottom: -60px; right: -60px; background: #0284c7; }
-
-        .main-container {
-            width: 100%;
-            max-width: 400px;
-            z-index: 10;
-            position: relative;
-        }
-
-        /* Thẻ Card Chính */
-        .payment-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            padding: 24px 20px;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.56),
-                        0 0 40px var(--primary-glow);
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            font-size: 22px;
+            cursor: pointer;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(20px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* Card Header & Status Badge */
-        .card-header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 14px;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            border-radius: 30px;
-            background: var(--success-bg);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #34d399;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background-color: var(--success);
-            box-shadow: 0 0 8px var(--success);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-        }
-
-        .tx-time {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* Frame Mã QR */
-        .qr-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 22px;
-        }
-
-        .qr-wrapper {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 20px;
-            width: 210px;
-            height: 210px;
-            display: flex;
             justify-content: center;
-            align-items: center;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
 
-        .qr-image {
+        .sidebar.open ~ .menu-btn {
+            background-color: #e74c3c;
+        }
+
+        .sidebar {
+            width: 0; 
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden; 
+            white-space: nowrap; 
+            position: absolute;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: 900;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.3);
+        }
+
+        .sidebar.open {
+            width: 280px;
+        }
+
+        .sidebar-header {
+            padding: 80px 20px 20px 20px;
+            background-color: #1a252f;
+            text-align: left;
+            font-weight: bold;
+            font-size: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .web-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .web-list li {
+            padding: 16px 20px;
+            border-bottom: 1px solid #34495e;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .web-list li:hover {
+            background-color: #34495e;
+        }
+
+        .web-list li.active {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            border-left: 4px solid #f1c40f;
+        }
+
+        .content {
+            flex-grow: 1;
             width: 100%;
             height: 100%;
-            border-radius: 12px;
-            object-fit: cover;
-            display: none;
-            image-rendering: -webkit-optimize-contrast;
-        }
-
-        .qr-hint {
-            margin-top: 10px;
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* Danh Sách Thông Tin (Ngân hàng, Số tài khoản, Chủ tài khoản) */
-        .info-list {
-            width: 100%;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .info-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 12px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .info-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .info-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .info-label {
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value {
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .info-value.mono {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 15px;
-            color: #38bdf8;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value.owner {
-            color: #fbbf24;
-            font-weight: 700;
-        }
-
-        .btn-copy {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: var(--text-muted);
-            cursor: pointer;
-            width: 34px;
-            height: 34px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .btn-copy:active {
-            transform: scale(0.92);
-            background: var(--primary);
-            color: #0f172a;
-        }
-
-        /* Trust Footer */
-        .trust-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 18px;
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        /* Nút Hành Động */
-        .action-buttons {
-            display: flex;
-            width: 100%;
-            margin-top: 18px;
-            gap: 10px;
-        }
-
-        .btn-action {
-            flex: 1;
-            padding: 13px 0;
-            border-radius: 14px;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 13.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
-            color: #ffffff;
-            box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(1px);
-            box-shadow: 0 4px 12px -2px rgba(56, 189, 248, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.06);
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .btn-secondary:active {
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .btn-action svg { width: 18px; height: 18px; fill: currentColor; }
-
-        /* Loading & Error */
-        #loading {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 40px 0;
-        }
-
-        .spinner {
-            width: 28px;
-            height: 28px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #error {
-            text-align: center;
-            padding: 16px;
-            color: #f87171;
-            background: rgba(248, 113, 113, 0.1);
-            border-radius: 14px;
-            border: 1px solid rgba(248, 113, 113, 0.2);
-            font-size: 13.5px;
-            display: none;
-        }
-
-        #content-wrapper { display: none; width: 100%; }
-
-        /* Modal & Toast */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(9, 13, 22, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
-        .modal-content {
-            background: #131b2e;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 24px;
-            width: 90%;
-            max-width: 340px;
             position: relative;
-            transform: scale(0.95);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .close-btn {
-            position: absolute; top: 16px; right: 16px;
-            color: var(--text-muted); cursor: pointer;
-            width: 28px; height: 28px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .modal-title { color: #f8fafc; font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; }
-        .guide-steps { list-style: none; }
-        .guide-steps li {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            font-size: 12.5px;
-            color: #cbd5e1;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .guide-steps li .step-num {
-            background: linear-gradient(135deg, #38bdf8, #6366f1);
-            color: #ffffff;
-            min-width: 20px; height: 20px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 11px;
         }
 
-        .toast {
-            position: fixed;
-            bottom: 30px; left: 50%;
-            transform: translateX(-50%) translateY(30px);
-            background: #ffffff;
-            color: #0f172a;
-            padding: 10px 22px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 700;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 1000;
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff;
         }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        .placeholder-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #7f8c8d;
+            font-size: 18px;
+            z-index: 10;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        /* ================= NÚT TẢI XUỐNG ỨNG DỤNG ================= */
+        #installAppBtn {
+            display: none; 
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+        #installAppBtn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
 
-    <div class="ambient-glow glow-1"></div>
-    <div class="ambient-glow glow-2"></div>
-
-    <div class="main-container">
-        
-        <div id="loading">
-            <div class="spinner"></div>
-            <span>Đang xác thực giao dịch...</span>
-        </div>
-
-        <div id="error"></div>
-
-        <div id="content-wrapper">
-            <div class="payment-card" id="capture-card">
-                
-                <!-- Card Header -->
-                <div class="card-header">
-                    <div class="status-badge">
-                        <span class="status-dot"></span>
-                        <span id="tx-status">Đang hoạt động</span>
-                    </div>
-                    <div class="tx-time" id="tx-time">--:-- --/--/----</div>
-                </div>
-
-                <!-- Frame Mã QR -->
-                <div class="qr-container">
-                    <div class="qr-wrapper">
-                        <img id="qr-image" class="qr-image" src="" alt="Mã QR" crossorigin="anonymous">
-                    </div>
-                    <div class="qr-hint">Quét mã để chuyển khoản nhanh</div>
-                </div>
-
-                <!-- Info List (Ngân hàng, Số tài khoản, Chủ tài khoản) -->
-                <div class="info-list">
-                    <div class="info-item">
-                        <div class="info-text">
-                            <span class="info-label">Ngân hàng</span>
-                            <span class="info-value" id="bank-name">---</span>
-                        </div>
-                        <button class="btn-copy" onclick="copyText('bank-name')">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                        </button>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-text">
-                            <span class="info-label">Số tài khoản</span>
-                            <span class="info-value mono" id="acc-number">---</span>
-                        </div>
-                        <button class="btn-copy" onclick="copyText('acc-number')">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                        </button>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-text">
-                            <span class="info-label">Chủ tài khoản</span>
-                            <span class="info-value owner" id="acc-owner">---</span>
-                        </div>
-                        <button class="btn-copy" onclick="copyText('acc-owner')">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Trust Mark -->
-                <div class="trust-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#10b981"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-5.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-                    Xác thực mã hóa VietQR 256-bit
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons" id="action-buttons">
-                    <button class="btn-action btn-primary" onclick="downloadImage()">
-                        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                        Lưu Mã QR
-                    </button>
-                    <button class="btn-action btn-secondary" onclick="openModal()">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
-                        Hướng Dẫn
-                    </button>
-                </div>
-
-            </div>
-        </div>
+    <div class="sidebar open" id="sidebar">
+        <div class="sidebar-header">Danh Mục Ứng Dụng</div>
+        <div id="loading" style="padding: 20px;">Đang kết nối...</div>
+        <ul class="web-list" id="webList"></ul>
     </div>
 
-    <!-- Modal Hướng Dẫn -->
-    <div id="guideModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </span>
-            <h3 class="modal-title">Hướng Dẫn Thanh Toán</h3>
-            <ul class="guide-steps">
-                <li><div class="step-num">1</div><div>Nhấn <strong>Lưu Mã QR</strong> để tải ảnh hóa đơn về máy.</div></li>
-                <li><div class="step-num">2</div><div>Mở ứng dụng <strong>Ngân hàng</strong> bất kỳ.</div></li>
-                <li><div class="step-num">3</div><div>Chọn <strong>Quét mã QR</strong> và tải ảnh từ thư viện.</div></li>
-                <li><div class="step-num">4</div><div>Xác nhận thông tin & hoàn tất giao dịch.</div></li>
-            </ul>
-        </div>
+    <div class="content">
+        <button id="menuBtn" class="menu-btn">✕</button>
+        <div id="placeholderText" class="placeholder-text">Vui lòng chọn ứng dụng</div>
+        <iframe id="webFrame" src="about:blank" title="Giao diện Web"></iframe>
     </div>
 
-    <div id="toast" class="toast">Đã sao chép thành công!</div>
+    <!-- Nút Tải Ứng Dụng -->
+    <button id="installAppBtn">📥 Cài Đặt Ứng Dụng</button>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const transactionId = urlParams.get('id') || '26091871248'; 
-        const webhookUrl = "https://script.google.com/macros/s/AKfycbyOz_0L9XUbwzt50UNG7M9ftZKmeYx_NdTFjep5hc25OeTfb1YlhiwvkCPUV4fHGMeMqA/exec";
-
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
+        // ================= ĐĂNG KÝ SERVICE WORKER =================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js').then(function(registration) {
+                    console.log('ServiceWorker đăng ký thành công');
+                }).catch(function(err) {
+                    console.log('ServiceWorker đăng ký thất bại:', err);
+                });
             });
         }
 
-        async function getSafeBase64(url) {
-            try {
-                const fetchUrl = url + (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-                const res = await fetch(fetchUrl, { mode: 'cors' });
-                if (res.ok) {
-                    const blob = await res.blob();
-                    return await blobToBase64(blob);
+        // ================= XỬ LÝ NÚT TẢI XUỐNG (PWA) =================
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt !== null) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('Người dùng đã cài đặt ứng dụng');
                 }
-            } catch(e) {}
-            
-            try {
-                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-                const res = await fetch(proxyUrl, { mode: 'cors' });
-                if (res.ok) {
-                    const blob = await res.blob();
-                    return await blobToBase64(blob);
-                }
-            } catch(e) {}
-            
-            return url; 
-        }
-
-        async function fetchQRCode() {
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ 
-                        action: "check", 
-                        sheet: "Ngân hàng", 
-                        ID: transactionId 
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.status === "success" && result.data) {
-                    const data = result.data;
-
-                    const bankName = data.Cot_C || "Ngân hàng";
-                    const bin = data.Cot_D;
-                    const accNumber = data.Cot_E;
-                    const accOwner = data.Cot_F;
-                    const statusText = data.Cot_G || "Hoạt động";
-                    const timeStr = data.Cot_B || result.time || "";
-
-                    document.getElementById('page-title').innerText = bankName + " - Thanh toán";
-                    document.getElementById('bank-name').innerText = bankName;
-                    document.getElementById('acc-number').innerText = accNumber;
-                    document.getElementById('acc-owner').innerText = accOwner;
-                    document.getElementById('tx-time').innerText = timeStr;
-                    document.getElementById('tx-status').innerText = statusText;
-                    
-                    // Tạo QR Code
-                    const qrUrl = `https://img.vietqr.io/image/${bin}-${accNumber}-qr_only.png`;
-                    const qrSafeUrl = await getSafeBase64(qrUrl);
-                    const qrImg = document.getElementById('qr-image');
-                    qrImg.onload = () => { qrImg.style.display = 'block'; };
-                    qrImg.src = qrSafeUrl;
-
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('content-wrapper').style.display = 'block';
-
-                } else {
-                    showError(result.message || "Không tìm thấy thông tin giao dịch.");
-                }
-            } catch (error) {
-                showError("Lỗi kết nối máy chủ. Vui lòng thử lại sau.");
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
             }
-        }
+        });
 
-        function showError(msg) {
-            document.getElementById('loading').style.display = 'none';
-            const errEl = document.getElementById('error');
-            errEl.style.display = 'block';
-            errEl.innerText = msg;
-        }
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+        });
 
-        let toastTimeout;
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2500); 
-        }
 
-        function copyText(elementId) {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Đã sao chép thành công"); 
+        // ================= XỬ LÝ GIAO DIỆN & API =================
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const placeholderText = document.getElementById('placeholderText');
+
+        menuBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            menuBtn.innerHTML = sidebar.classList.contains('open') ? "✕" : "☰";
+        });
+
+        document.querySelector('.content').addEventListener('click', function(e) {
+            if (sidebar.classList.contains('open') && e.target !== menuBtn) {
+                sidebar.classList.remove('open');
+                menuBtn.innerHTML = "☰";
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", fetchDataAndRender);
+
+        function fetchDataAndRender() {
+            const url = "https://script.google.com/macros/s/AKfycbzU2-uP0jUUia8w74BBQ7U78OUn3d_SE7cEd_LBZJbq2b2g4HCJyFRAOLKMU9p2zb0F/exec";
+            const payload = { "sheet": "Home", "action": "get" };
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                if (data.status === "success" && data.all_data && data.all_data.Home) {
+                    renderList(data.all_data.Home);
+                }
+            })
+            .catch(err => {
+                document.getElementById('loading').innerText = "Lỗi kết nối!";
             });
         }
 
-        // Xuất ảnh siêu nét & chống mờ/xám ảnh
-        async function downloadImage() {
-            showToast("Đang tạo hóa đơn siêu nét...");
-            const card = document.getElementById('capture-card');
-            const buttons = document.getElementById('action-buttons');
-            const copyIcons = document.querySelectorAll('.btn-copy');
+        function renderList(rows) {
+            const listContainer = document.getElementById('webList');
+            for (let i = 1; i < rows.length; i++) {
+                const tenWeb = rows[i].A;
+                const urlWeb = rows[i].B;
+                if (!tenWeb) continue; 
 
-            const origBg = card.style.background;
-            const origBackdrop = card.style.backdropFilter;
-            const origWebkitBackdrop = card.style.webkitBackdropFilter;
-
-            buttons.style.display = 'none';
-            copyIcons.forEach(icon => icon.style.display = 'none');
-
-            card.style.background = '#0f172a'; 
-            card.style.backdropFilter = 'none';
-            card.style.webkitBackdropFilter = 'none';
-
-            try {
-                await new Promise(resolve => setTimeout(resolve, 200));
-
-                const devicePixelRatio = window.devicePixelRatio || 1;
-                const ultraScale = devicePixelRatio * 3; 
-
-                const canvas = await html2canvas(card, {
-                    backgroundColor: '#0f172a', 
-                    scale: ultraScale, 
-                    useCORS: true, 
-                    allowTaint: false,
-                    logging: false
+                const listItem = document.createElement('li');
+                listItem.innerText = tenWeb;
+                listItem.addEventListener('click', function() {
+                    listContainer.querySelectorAll('li').forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    sidebar.classList.remove('open');
+                    menuBtn.innerHTML = "☰";
+                    placeholderText.style.display = 'none';
+                    loadWeb(tenWeb, urlWeb);
                 });
-
-                const image = canvas.toDataURL("image/png", 1.0);
-                const link = document.createElement('a');
-                link.href = image;
-                link.download = `ThanhToan_${transactionId}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                showToast("Đã lưu ảnh thành công!");
-            } catch (err) {
-                console.error(err);
-                showToast("Vui lòng chụp màn hình để lưu QR.");
-            } finally {
-                buttons.style.display = 'flex';
-                copyIcons.forEach(icon => icon.style.display = 'flex');
-                
-                card.style.background = origBg;
-                card.style.backdropFilter = origBackdrop;
-                card.style.webkitBackdropFilter = origWebkitBackdrop;
+                listContainer.appendChild(listItem);
             }
         }
 
-        const modal = document.getElementById('guideModal');
-        function openModal() { modal.classList.add('active'); }
-        function closeModal() { modal.classList.remove('active'); }
-        window.onclick = function(event) { if (event.target == modal) closeModal(); }
-
-        fetchQRCode();
+        function loadWeb(name, url) {
+            const iframe = document.getElementById('webFrame');
+            document.title = name; // Vẫn cập nhật title trang web
+            if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                iframe.src = url;
+            } else {
+                iframe.src = "about:blank"; 
+                placeholderText.style.display = 'block';
+                placeholderText.innerText = `Lỗi: URL không hợp lệ.`;
+            }
+        }
     </script>
 </body>
 </html>
