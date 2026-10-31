@@ -2,61 +2,98 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Đinh Trường</title>
     
-    <!-- Favicon (Icon trên tab trình duyệt) -->
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/295/295118.png">
-    <!-- Liên kết tới file Manifest -->
     <link rel="manifest" href="./manifest.json">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#2c3e50">
+    <meta name="theme-color" content="#0f172a">
     
     <style>
+        /* ================= BIẾN CSS & GIAO DIỆN NỀN ================= */
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body, html {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
-            background-color: #f5f6fa;
+            background: var(--bg-gradient);
+            color: var(--text-main);
         }
 
+        /* ================= HIỆU ỨNG GLASSMORPHISM ================= */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid var(--glass-border);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ================= NÚT MENU NỔI ================= */
         .menu-btn {
             position: fixed;
-            top: 15px;
-            left: 15px;
+            top: 20px;
+            left: 20px;
             z-index: 1000;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            width: 45px;
-            height: 45px;
-            font-size: 22px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-btn:active {
+            transform: scale(0.92);
         }
 
         .sidebar.open ~ .menu-btn {
-            background-color: #e74c3c;
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
         }
 
+        /* ================= SIDEBAR (DANH SÁCH WEB) ================= */
         .sidebar {
             width: 0; 
-            background-color: #2c3e50;
-            color: #ecf0f1;
             display: flex;
             flex-direction: column;
-            transition: width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden; 
             white-space: nowrap; 
             position: absolute;
@@ -64,73 +101,119 @@
             left: 0;
             top: 0;
             z-index: 900;
-            box-shadow: 3px 0 10px rgba(0,0,0,0.3);
         }
 
         .sidebar.open {
-            width: 280px;
+            width: 300px;
         }
 
-        .sidebar-header {
-            padding: 80px 20px 20px 20px;
-            background-color: #1a252f;
-            text-align: left;
-            font-weight: bold;
-            font-size: 20px;
-            border-bottom: 1px solid #34495e;
-        }
-
+        /* DANH SÁCH (Đã bỏ header, đẩy nội dung xuống dưới nút Menu) */
         .web-list {
             list-style: none;
-            padding: 0;
+            /* Padding top 85px để đẩy mục đầu tiên xuống dưới vị trí nút Menu nổi */
+            padding: 85px 12px 20px 12px; 
             margin: 0;
             overflow-y: auto;
             flex-grow: 1;
+            scrollbar-width: none; 
+        }
+        
+        .web-list::-webkit-scrollbar {
+            display: none; 
         }
 
         .web-list li {
-            padding: 16px 20px;
-            border-bottom: 1px solid #34495e;
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        
+
+        .web-list li::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
         .web-list li:hover {
-            background-color: #34495e;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            transform: translateX(4px);
         }
 
         .web-list li.active {
-            background-color: #3498db;
-            color: white;
-            font-weight: bold;
-            border-left: 4px solid #f1c40f;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--text-main);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .web-list li.active::before {
+            background-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
         }
 
+        /* ================= KHUNG CHỨA NỘI DUNG ================= */
         .content {
             flex-grow: 1;
             width: 100%;
             height: 100%;
             display: flex;
             position: relative;
+            background-color: #ffffff;
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            background-color: #ffffff;
+            z-index: 1;
+        }
+
+        /* Màn hình chờ */
+        .overlay-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .placeholder-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #7f8c8d;
-            font-size: 18px;
-            z-index: 10;
+            color: var(--text-muted);
+            font-size: 16px;
             text-align: center;
-            pointer-events: none;
+            letter-spacing: 0.5px;
         }
 
         /* ================= NÚT TẢI XUỐNG ỨNG DỤNG ================= */
@@ -139,17 +222,21 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background-color: #27ae60;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 24px;
             border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
             cursor: pointer;
             z-index: 1000;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            display: flex; /* Dùng flex để icon và chữ căn giữa */
+            align-items: center;
+            gap: 8px;
         }
         #installAppBtn:active {
             transform: scale(0.95);
@@ -158,100 +245,113 @@
 </head>
 <body>
 
-    <div class="sidebar open" id="sidebar">
-        <div class="sidebar-header">Danh Mục Ứng Dụng</div>
-        <div id="loading" style="padding: 20px;">Đang kết nối...</div>
+    <!-- Đã xóa <div class="sidebar-header">Khám Phá</div> -->
+    <div class="sidebar glass-panel open" id="sidebar">
         <ul class="web-list" id="webList"></ul>
     </div>
 
     <div class="content">
-        <button id="menuBtn" class="menu-btn">✕</button>
-        <div id="placeholderText" class="placeholder-text">Vui lòng chọn ứng dụng</div>
+        <button id="menuBtn" class="menu-btn">
+            <svg id="icon-menu" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+        
+        <div id="overlayScreen" class="overlay-screen">
+            <div id="loadingSpinner" class="spinner"></div>
+            <div id="placeholderText" class="placeholder-text">Đang đồng bộ dữ liệu...</div>
+        </div>
+
         <iframe id="webFrame" src="about:blank" title="Giao diện Web"></iframe>
     </div>
 
-    <!-- Nút Tải Ứng Dụng -->
-    <button id="installAppBtn">📥 Cài Đặt Ứng Dụng</button>
+    <!-- Ẩn mặc định bằng JS, CSS inline display:none để đảm bảo không nháy lúc load -->
+    <button id="installAppBtn" style="display: none;">
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Cài Đặt
+    </button>
 
     <script>
-        // ================= ĐĂNG KÝ SERVICE WORKER =================
+        // ================= SERVICE WORKER =================
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js').then(function(registration) {
-                    console.log('ServiceWorker đăng ký thành công');
-                }).catch(function(err) {
-                    console.log('ServiceWorker đăng ký thất bại:', err);
-                });
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
             });
         }
 
-        // ================= XỬ LÝ NÚT TẢI XUỐNG (PWA) =================
+        // ================= PWA INSTALL =================
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.style.display = 'block';
+            installBtn.style.display = 'flex'; // Dùng flex thay vì block để icon canh đẹp
         });
 
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt !== null) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('Người dùng đã cài đặt ứng dụng');
-                }
                 deferredPrompt = null;
                 installBtn.style.display = 'none';
             }
         });
+        window.addEventListener('appinstalled', () => installBtn.style.display = 'none');
 
-        window.addEventListener('appinstalled', () => {
-            installBtn.style.display = 'none';
-        });
-
-
-        // ================= XỬ LÝ GIAO DIỆN & API =================
+        // ================= DOM ELEMENTS & GIAO DIỆN =================
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
+        const iconMenu = document.getElementById('icon-menu');
+        const overlayScreen = document.getElementById('overlayScreen');
         const placeholderText = document.getElementById('placeholderText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
 
-        menuBtn.addEventListener('click', function() {
+        function updateMenuIcon() {
+            if (sidebar.classList.contains('open')) {
+                iconMenu.innerHTML = `<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>`;
+            } else {
+                iconMenu.innerHTML = `<path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>`;
+            }
+        }
+
+        menuBtn.addEventListener('click', () => {
             sidebar.classList.toggle('open');
-            menuBtn.innerHTML = sidebar.classList.contains('open') ? "✕" : "☰";
+            updateMenuIcon();
         });
 
-        document.querySelector('.content').addEventListener('click', function(e) {
-            if (sidebar.classList.contains('open') && e.target !== menuBtn) {
+        document.querySelector('.content').addEventListener('click', (e) => {
+            if (sidebar.classList.contains('open') && e.target !== menuBtn && !menuBtn.contains(e.target)) {
                 sidebar.classList.remove('open');
-                menuBtn.innerHTML = "☰";
+                updateMenuIcon();
             }
         });
+        updateMenuIcon(); 
 
-        document.addEventListener("DOMContentLoaded", fetchDataAndRender);
-
-        function fetchDataAndRender() {
+        // ================= FETCH API =================
+        document.addEventListener("DOMContentLoaded", () => {
             const url = "https://script.google.com/macros/s/AKfycbzU2-uP0jUUia8w74BBQ7U78OUn3d_SE7cEd_LBZJbq2b2g4HCJyFRAOLKMU9p2zb0F/exec";
-            const payload = { "sheet": "Home", "action": "get" };
-
+            
             fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ "sheet": "Home", "action": "get" })
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('loading').style.display = 'none';
-                if (data.status === "success" && data.all_data && data.all_data.Home) {
+                loadingSpinner.style.display = 'none';
+                if (data.status === "success" && data.all_data?.Home) {
                     renderList(data.all_data.Home);
+                    placeholderText.innerText = "Chọn một ứng dụng từ Menu";
+                } else {
+                    placeholderText.innerText = "Dữ liệu không hợp lệ.";
                 }
             })
             .catch(err => {
-                document.getElementById('loading').innerText = "Lỗi kết nối!";
+                loadingSpinner.style.display = 'none';
+                placeholderText.innerText = "Lỗi kết nối máy chủ!";
             });
-        }
+        });
 
+        // ================= XỬ LÝ DANH SÁCH =================
         function renderList(rows) {
             const listContainer = document.getElementById('webList');
             for (let i = 1; i < rows.length; i++) {
@@ -261,12 +361,14 @@
 
                 const listItem = document.createElement('li');
                 listItem.innerText = tenWeb;
+                
                 listItem.addEventListener('click', function() {
                     listContainer.querySelectorAll('li').forEach(item => item.classList.remove('active'));
                     this.classList.add('active');
+                    
                     sidebar.classList.remove('open');
-                    menuBtn.innerHTML = "☰";
-                    placeholderText.style.display = 'none';
+                    updateMenuIcon();
+                    
                     loadWeb(tenWeb, urlWeb);
                 });
                 listContainer.appendChild(listItem);
@@ -275,13 +377,18 @@
 
         function loadWeb(name, url) {
             const iframe = document.getElementById('webFrame');
-            document.title = name; // Vẫn cập nhật title trang web
+            document.title = name;
+            
             if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                overlayScreen.style.opacity = '0';
+                setTimeout(() => overlayScreen.style.display = 'none', 500);
                 iframe.src = url;
             } else {
                 iframe.src = "about:blank"; 
-                placeholderText.style.display = 'block';
-                placeholderText.innerText = `Lỗi: URL không hợp lệ.`;
+                overlayScreen.style.display = 'flex';
+                overlayScreen.style.opacity = '1';
+                loadingSpinner.style.display = 'none';
+                placeholderText.innerText = `Lỗi: URL của "${name}" không hợp lệ.`;
             }
         }
     </script>
