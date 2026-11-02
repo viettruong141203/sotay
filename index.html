@@ -35,7 +35,7 @@
             overscroll-behavior-y: contain; 
         }
 
-        /* ================= GIAO DIỆN BẮT BUỘC CÀI ĐẶT (FORCE INSTALL) ================= */
+        /* ================= GIAO DIỆN BẮT BUỘC CÀI ĐẶT ================= */
         #installOverlay {
             position: fixed; inset: 0;
             background: var(--bg-gradient);
@@ -60,7 +60,7 @@
         #installOverlay p { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; line-height: 1.5; max-width: 320px; }
 
         #installAppBtn {
-            display: none; /* JS sẽ bật lên nếu Android hỗ trợ PWA */
+            display: none; 
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white; border: none; padding: 14px 30px;
             border-radius: 50px; font-size: 16px; font-weight: bold;
@@ -71,7 +71,7 @@
         #installAppBtn:active { transform: scale(0.95); }
 
         #iosInstructions {
-            display: none; /* JS sẽ bật lên nếu phát hiện iOS */
+            display: none; 
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
             padding: 18px; border-radius: 12px;
             color: #d4d4d8; font-size: 14px; text-align: left; line-height: 1.7;
@@ -84,10 +84,7 @@
             width: 100%; height: 100%; position: relative;
         }
 
-        /* 
-           Đây là CSS thần thánh để tự động mở khóa app 
-           khi khởi chạy từ màn hình chính (chế độ Standalone) 
-        */
+        /* Mở khóa app tự động khi chạy chế độ Standalone (đã tải về) */
         @media all and (display-mode: standalone) {
             #installOverlay { display: none !important; }
             #mainApp { display: flex !important; }
@@ -144,13 +141,11 @@
         <h2>Bảo Mật Ứng Dụng</h2>
         <p>Để đảm bảo trải nghiệm tốt nhất, bạn phải tải ứng dụng này về màn hình chính điện thoại mới có thể sử dụng.</p>
 
-        <!-- Nút tải cho Android -->
         <button id="installAppBtn">
             <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             Cài Đặt Ứng Dụng Ngay
         </button>
 
-        <!-- Hướng dẫn tải cho iOS -->
         <div id="iosInstructions">
             <span>Dành cho thiết bị iPhone/iPad:</span><br><br>
             1. Bấm nút <b>Chia sẻ</b> (ô vuông có mũi tên lên) ở thanh trình duyệt phía dưới.<br>
@@ -159,35 +154,29 @@
         </div>
     </div>
 
-    <!-- ================= TOÀN BỘ KHUNG GIAO DIỆN APP (ĐƯỢC BẢO VỆ) ================= -->
+    <!-- ================= TOÀN BỘ KHUNG GIAO DIỆN APP ================= -->
     <div id="mainApp">
-        <!-- Lớp phủ tối khi mở danh sách -->
         <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-        <!-- Sidebar Danh sách -->
         <div class="sidebar glass-panel" id="sidebar">
             <ul class="web-list" id="webList"></ul>
         </div>
 
-        <!-- Nút Trợ lý ảo (FAB) -->
         <div id="fabBtn" class="fab-btn">
             <svg id="icon-menu" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
         </div>
 
-        <!-- Khung hiển thị nội dung Web -->
         <div class="content">
             <div id="overlayScreen" class="overlay-screen">
                 <div id="loadingSpinner" class="spinner"></div>
                 <div id="placeholderText" class="placeholder-text">Đang kết nối hệ thống...</div>
             </div>
             
-            <!-- ĐÃ XÓA SANDBOX để chống lỗi Load trang và đăng nhập ở các trang web con -->
             <iframe id="webFrame" src="about:blank" title="Giao diện Web"></iframe>
         </div>
     </div>
 
     <script>
-        // ================= BIẾN TOÀN CỤC =================
         let dataLoaded = false; 
 
         // ================= KIỂM TRA TRẠNG THÁI STANDALONE VÀ TẢI APP =================
@@ -197,27 +186,20 @@
             const mainApp = document.getElementById('mainApp');
 
             if (isStandalone) {
-                // Đã cài đặt -> Mở khóa và tải API
                 installOverlay.style.display = 'none';
                 mainApp.style.display = 'flex';
-                
-                // Mở mặc định Menu danh sách khi khởi chạy
-                toggleSidebar(false); 
-                
+                toggleSidebar(false); // Mở menu khi mới vào app
                 loadAppData();
             } else {
-                // Chưa cài đặt -> Hiện hướng dẫn
                 const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
                 if (isIos) {
                     document.getElementById('iosInstructions').style.display = 'block';
                 }
             }
         }
-        
-        // Chạy kiểm tra khởi tạo
         checkAndInitApp();
 
-        // ================= ĐĂNG KÝ SERVICE WORKER (BẮT BUỘC ĐỂ PWA HOẠT ĐỘNG) =================
+        // ================= ĐĂNG KÝ SERVICE WORKER =================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { 
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration failed:', err)); 
@@ -260,13 +242,11 @@
         let currentX, currentY, initialX, initialY;
         let xOffset = 0, yOffset = 0;
 
-        // Khôi phục vị trí lưu
         const savedPos = JSON.parse(localStorage.getItem('fabPosition'));
         if (savedPos) { 
             xOffset = savedPos.x; yOffset = savedPos.y; setTranslate(xOffset, yOffset, fabBtn); 
         }
 
-        // Đăng ký sự kiện kéo
         fabBtn.addEventListener("touchstart", dragStart, { passive: false });
         fabBtn.addEventListener("touchend", dragEnd, { passive: false });
         fabBtn.addEventListener("touchmove", drag, { passive: false });
@@ -289,13 +269,9 @@
                 currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
                 currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
                 
-                // Thuật toán đo khoảng cách di chuyển để phân biệt Click và Drag
                 let moveDistance = Math.abs(currentX - xOffset) + Math.abs(currentY - yOffset);
-                if (moveDistance > 5) { // Phải di chuyển tay quá 5 pixel mới tính là kéo
-                    hasMoved = true;
-                }
+                if (moveDistance > 5) { hasMoved = true; }
                 
-                // Thuật toán giữ nút không lọt ra ngoài màn hình
                 const rect = fabBtn.getBoundingClientRect();
                 const maxX = window.innerWidth - rect.width - 15; 
                 const maxY = window.innerHeight - rect.height - 15;
@@ -324,7 +300,6 @@
             if (forceClose) { sidebar.classList.remove('open'); } 
             else { sidebar.classList.toggle('open'); }
             
-            // Đổi icon và lớp phủ mờ
             if (sidebar.classList.contains('open')) {
                 sidebarBackdrop.classList.add('active'); 
                 fabBtn.classList.add('is-open');
@@ -337,18 +312,18 @@
         }
         
         fabBtn.addEventListener('click', (e) => { 
-            if (hasMoved) { hasMoved = false; return; } // Nếu vừa kéo xong thì bỏ qua sự kiện click
+            if (hasMoved) { hasMoved = false; return; } 
             toggleSidebar(); 
         });
         
         sidebarBackdrop.addEventListener('click', () => { toggleSidebar(true); });
 
 
-        // ================= API FETCH (LẤY DỮ LIỆU TỪ GOOGLE SHEETS) =================
+        // ================= API FETCH LẤY DỮ LIỆU GOOGLE SHEETS =================
         const overlayScreen = document.getElementById('overlayScreen'), placeholderText = document.getElementById('placeholderText'), loadingSpinner = document.getElementById('loadingSpinner');
 
         function loadAppData() {
-            if(dataLoaded) return; // Chỉ gọi 1 lần
+            if(dataLoaded) return; 
             
             const url = "https://script.google.com/macros/s/AKfycbzU2-uP0jUUia8w74BBQ7U78OUn3d_SE7cEd_LBZJbq2b2g4HCJyFRAOLKMU9p2zb0F/exec";
             
@@ -375,13 +350,12 @@
             });
         }
 
-        // Tạo danh sách và bọc kỹ lọc lỗi URL
+        // Tạo danh sách (Tự động ẩn các web trống hoặc lỗi URL)
         function renderList(rows) {
             const listContainer = document.getElementById('webList');
             for (let i = 1; i < rows.length; i++) {
                 const tenWeb = rows[i].A, urlWeb = rows[i].B;
                 
-                // Lọc BỎ các mục trống hoặc url bị lỗi cú pháp
                 if (!tenWeb || !urlWeb || (!urlWeb.startsWith('http://') && !urlWeb.startsWith('https://'))) continue; 
 
                 const listItem = document.createElement('li'); 
@@ -391,8 +365,8 @@
                     listContainer.querySelectorAll('li').forEach(item => item.classList.remove('active'));
                     this.classList.add('active'); 
                     
-                    toggleSidebar(true); // Đóng menu
-                    loadWeb(tenWeb, urlWeb); // Mở link
+                    toggleSidebar(true); 
+                    loadWeb(tenWeb, urlWeb); 
                 });
                 listContainer.appendChild(listItem);
             }
