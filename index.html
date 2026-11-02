@@ -13,9 +13,10 @@
     <meta name="theme-color" content="#0f172a">
     
     <style>
+        /* ================= BIẾN CSS & CẤU HÌNH GỐC ================= */
         :root {
-            --glass-bg: rgba(15, 23, 42, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #3b82f6;
@@ -39,31 +40,27 @@
             position: fixed; inset: 0;
             background: var(--bg-gradient);
             z-index: 10000;
-            display: flex; /* Mặc định hiện màn hình bắt cài đặt */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
+            display: flex; /* Bật mặc định, JS/CSS sẽ ẩn đi nếu đã cài */
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
         }
 
         .lock-icon {
             width: 80px; height: 80px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--glass-border);
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
         }
 
         .lock-icon svg { width: 40px; height: 40px; fill: #3b82f6; }
-
-        #installOverlay h2 { margin: 0 0 10px 0; font-size: 22px; }
+        #installOverlay h2 { margin: 0 0 10px 0; font-size: 22px; font-weight: 600; }
         #installOverlay p { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; line-height: 1.5; max-width: 320px; }
 
         #installAppBtn {
-            display: none; /* Chỉ hiện trên Android khi API sẵn sàng */
+            display: none; /* JS sẽ bật lên nếu Android hỗ trợ PWA */
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white; border: none; padding: 14px 30px;
             border-radius: 50px; font-size: 16px; font-weight: bold;
@@ -73,139 +70,164 @@
         }
         #installAppBtn:active { transform: scale(0.95); }
 
-        /* Hướng dẫn thủ công cho iPhone (iOS) */
         #iosInstructions {
-            display: none; 
+            display: none; /* JS sẽ bật lên nếu phát hiện iOS */
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 12px;
-            color: #d4d4d8; font-size: 14px; text-align: left; line-height: 1.6;
+            padding: 18px; border-radius: 12px;
+            color: #d4d4d8; font-size: 14px; text-align: left; line-height: 1.7;
         }
-        #iosInstructions span { color: white; font-weight: bold; }
+        #iosInstructions span { color: white; font-weight: bold; font-size: 15px; }
 
         /* ================= CONTAINER CHÍNH CỦA APP ================= */
         #mainApp {
-            display: none; /* Ẩn toàn bộ App mặc định */
+            display: none; /* Ẩn toàn bộ App mặc định để khóa */
             width: 100%; height: 100%; position: relative;
         }
 
-        /* Khi mở bằng icon ngoài màn hình chính (Standalone) -> Mở khóa App */
+        /* 
+           Đây là CSS thần thánh để tự động mở khóa app 
+           khi khởi chạy từ màn hình chính (chế độ Standalone) 
+        */
         @media all and (display-mode: standalone) {
             #installOverlay { display: none !important; }
             #mainApp { display: flex !important; }
         }
 
-        /* ================= CSS CỦA APP (GIỮ NGUYÊN) ================= */
+        /* ================= CSS CÁC THÀNH PHẦN BÊN TRONG APP ================= */
         .sidebar-backdrop {
-            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.4); z-index: 800; 
+            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 800; 
             opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .sidebar-backdrop.active { opacity: 1; visibility: visible; }
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-right: 1px solid var(--glass-border); }
+
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-right: 1px solid var(--glass-border); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
         .sidebar { width: 0; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; white-space: nowrap; position: absolute; height: 100%; left: 0; top: 0; z-index: 900; }
         .sidebar.open { width: 280px; }
-        .web-list { list-style: none; padding: 30px 12px 20px 12px; margin: 0; overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
+
+        .web-list { list-style: none; padding: 40px 12px 20px 12px; margin: 0; overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
         .web-list::-webkit-scrollbar { display: none; }
-        .web-list li { padding: 15px 20px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-muted); border: 1px solid transparent; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; }
+        .web-list li { padding: 16px 20px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-muted); border: 1px solid transparent; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; }
         .web-list li::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-muted); transition: all 0.3s ease; }
         .web-list li:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
         .web-list li.active { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--text-main); }
-        .web-list li.active::before { background-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        .web-list li.active::before { background-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
         
         .content { flex-grow: 1; width: 100%; height: 100%; display: flex; position: relative; background-color: #ffffff; }
+        
         iframe { width: 100%; height: 100%; border: none; z-index: 1; }
+        
         .overlay-screen { position: absolute; inset: 0; background: var(--bg-gradient); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.3s ease; }
         .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s ease-in-out infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .placeholder-text { color: var(--text-muted); font-size: 15px; text-align: center; }
 
+        /* ================= NÚT TRỢ LÝ ẢO ================= */
         .fab-btn {
             position: fixed; top: 20px; left: 20px; z-index: 9999;
             background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%;
-            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: background-color 0.2s, transform 0.1s; touch-action: none; cursor: grab;
+            width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: background-color 0.2s, transform 0.1s; touch-action: none; cursor: grab;
         }
         .fab-btn:active { cursor: grabbing; transform: scale(0.95); }
         .fab-btn svg { width: 22px; height: 22px; fill: currentColor; pointer-events: none; }
-        .fab-btn.is-open { background: rgba(220, 38, 38, 0.85); border-color: rgba(239, 68, 68, 0.5); }
+        .fab-btn.is-open { background: rgba(220, 38, 38, 0.9); border-color: rgba(239, 68, 68, 0.6); }
     </style>
 </head>
 <body>
 
-    <!-- ================= MÀN HÌNH CHẶN CÀI ĐẶT ================= -->
+    <!-- ================= MÀN HÌNH CHẶN CÀI ĐẶT (FORCE INSTALL) ================= -->
     <div id="installOverlay">
         <div class="lock-icon">
             <svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/></svg>
         </div>
-        <h2>Yêu cầu Tải Ứng Dụng</h2>
-        <p>Phiên bản Web bị giới hạn. Bạn bắt buộc phải cài đặt ứng dụng này về điện thoại để sử dụng.</p>
+        <h2>Bảo Mật Ứng Dụng</h2>
+        <p>Để đảm bảo trải nghiệm tốt nhất, bạn phải tải ứng dụng này về màn hình chính điện thoại mới có thể sử dụng.</p>
 
         <!-- Nút tải cho Android -->
         <button id="installAppBtn">
             <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            Tải App Ngay
+            Cài Đặt Ứng Dụng Ngay
         </button>
 
         <!-- Hướng dẫn tải cho iOS -->
         <div id="iosInstructions">
-            <span>Dành cho iPhone/iPad:</span><br>
-            1. Bấm nút <b>Chia sẻ</b> (biểu tượng mũi tên lên) ở thanh dưới cùng Safari.<br>
-            2. Cuộn xuống và chọn <b>"Thêm vào MH chính"</b> (Add to Home Screen).
+            <span>Dành cho thiết bị iPhone/iPad:</span><br><br>
+            1. Bấm nút <b>Chia sẻ</b> (ô vuông có mũi tên lên) ở thanh trình duyệt phía dưới.<br>
+            2. Chọn chức năng <b>"Thêm vào MH chính"</b> (Add to Home Screen).<br>
+            3. Quay ra màn hình chính, tìm Icon ứng dụng và mở lên.
         </div>
     </div>
 
-    <!-- ================= TOÀN BỘ APP BÊN TRONG ================= -->
+    <!-- ================= TOÀN BỘ KHUNG GIAO DIỆN APP (ĐƯỢC BẢO VỆ) ================= -->
     <div id="mainApp">
-        <div id="sidebarBackdrop" class="sidebar-backdrop active"></div>
+        <!-- Lớp phủ tối khi mở danh sách -->
+        <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-        <div class="sidebar glass-panel open" id="sidebar">
+        <!-- Sidebar Danh sách -->
+        <div class="sidebar glass-panel" id="sidebar">
             <ul class="web-list" id="webList"></ul>
         </div>
 
-        <div id="fabBtn" class="fab-btn is-open">
-            <svg id="icon-menu" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        <!-- Nút Trợ lý ảo (FAB) -->
+        <div id="fabBtn" class="fab-btn">
+            <svg id="icon-menu" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
         </div>
 
+        <!-- Khung hiển thị nội dung Web -->
         <div class="content">
             <div id="overlayScreen" class="overlay-screen">
                 <div id="loadingSpinner" class="spinner"></div>
-                <div id="placeholderText" class="placeholder-text">Đang đồng bộ dữ liệu...</div>
+                <div id="placeholderText" class="placeholder-text">Đang kết nối hệ thống...</div>
             </div>
             
-            <iframe id="webFrame" src="about:blank" title="Giao diện Web" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <!-- ĐÃ XÓA SANDBOX để chống lỗi Load trang và đăng nhập ở các trang web con -->
+            <iframe id="webFrame" src="about:blank" title="Giao diện Web"></iframe>
         </div>
     </div>
 
     <script>
-        // ================= KIỂM TRA ĐÃ CÀI ĐẶT APP HAY CHƯA =================
-        // Kiểm tra qua Javascript (hỗ trợ thêm cho iOS)
-        function checkStandalone() {
-            if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('installOverlay').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'flex';
-                loadAppData(); // Chỉ chạy dữ liệu khi app đã được mở khóa
+        // ================= BIẾN TOÀN CỤC =================
+        let dataLoaded = false; 
+
+        // ================= KIỂM TRA TRẠNG THÁI STANDALONE VÀ TẢI APP =================
+        function checkAndInitApp() {
+            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            const installOverlay = document.getElementById('installOverlay');
+            const mainApp = document.getElementById('mainApp');
+
+            if (isStandalone) {
+                // Đã cài đặt -> Mở khóa và tải API
+                installOverlay.style.display = 'none';
+                mainApp.style.display = 'flex';
+                
+                // Mở mặc định Menu danh sách khi khởi chạy
+                toggleSidebar(false); 
+                
+                loadAppData();
+            } else {
+                // Chưa cài đặt -> Hiện hướng dẫn
+                const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+                if (isIos) {
+                    document.getElementById('iosInstructions').style.display = 'block';
+                }
             }
         }
-        checkStandalone(); // Chạy ngay khi mở web
+        
+        // Chạy kiểm tra khởi tạo
+        checkAndInitApp();
 
-        // Phát hiện nếu là trình duyệt Safari/iOS để hiện hướng dẫn thủ công vì iOS không cho hiện nút tải tự động
-        const isIos = () => {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            return /iphone|ipad|ipod/.test(userAgent);
-        };
-        if (isIos() && !window.navigator.standalone) {
-            document.getElementById('iosInstructions').style.display = 'block';
-        }
-
-        // ================= SERVICE WORKER & PWA TẢI APP =================
+        // ================= ĐĂNG KÝ SERVICE WORKER (BẮT BUỘC ĐỂ PWA HOẠT ĐỘNG) =================
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+            window.addEventListener('load', () => { 
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration failed:', err)); 
+            });
         }
 
+        // ================= XỬ LÝ NÚT TẢI ANDROID =================
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
         
-        // Hiện nút Cài đặt trên Android/Chrome
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -217,7 +239,6 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if(outcome === 'accepted') {
-                    // Khi tải xong thì ẩn màn hình khóa, mở app
                     document.getElementById('installOverlay').style.display = 'none';
                     document.getElementById('mainApp').style.display = 'flex';
                     loadAppData();
@@ -226,7 +247,6 @@
             }
         });
 
-        // Bắt sự kiện hệ thống cài đặt thành công
         window.addEventListener('appinstalled', () => {
             document.getElementById('installOverlay').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
@@ -234,14 +254,19 @@
         });
 
 
-        // ================= PHẦN DƯỚI LÀ CODE APP (CHỈ CHẠY KHI ĐÃ CÀI ĐẶT) =================
+        // ================= KÉO THẢ NÚT TRỢ LÝ ẢO =================
         const fabBtn = document.getElementById('fabBtn');
-        let isDragging = false, hasMoved = false, currentX, currentY, initialX, initialY;
+        let isDragging = false, hasMoved = false; 
+        let currentX, currentY, initialX, initialY;
         let xOffset = 0, yOffset = 0;
 
+        // Khôi phục vị trí lưu
         const savedPos = JSON.parse(localStorage.getItem('fabPosition'));
-        if (savedPos) { xOffset = savedPos.x; yOffset = savedPos.y; setTranslate(xOffset, yOffset, fabBtn); }
+        if (savedPos) { 
+            xOffset = savedPos.x; yOffset = savedPos.y; setTranslate(xOffset, yOffset, fabBtn); 
+        }
 
+        // Đăng ký sự kiện kéo
         fabBtn.addEventListener("touchstart", dragStart, { passive: false });
         fabBtn.addEventListener("touchend", dragEnd, { passive: false });
         fabBtn.addEventListener("touchmove", drag, { passive: false });
@@ -252,7 +277,10 @@
         function dragStart(e) {
             initialX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOffset;
             initialY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOffset;
-            if (e.target === fabBtn || fabBtn.contains(e.target)) { isDragging = true; hasMoved = false; }
+            if (e.target === fabBtn || fabBtn.contains(e.target)) { 
+                isDragging = true; 
+                hasMoved = false; 
+            }
         }
 
         function drag(e) {
@@ -260,75 +288,131 @@
                 e.preventDefault(); 
                 currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
                 currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
+                
+                // Thuật toán đo khoảng cách di chuyển để phân biệt Click và Drag
+                let moveDistance = Math.abs(currentX - xOffset) + Math.abs(currentY - yOffset);
+                if (moveDistance > 5) { // Phải di chuyển tay quá 5 pixel mới tính là kéo
+                    hasMoved = true;
+                }
+                
+                // Thuật toán giữ nút không lọt ra ngoài màn hình
                 const rect = fabBtn.getBoundingClientRect();
-                const maxX = window.innerWidth - rect.width - 20; const maxY = window.innerHeight - rect.height - 20;
-                if(currentX > maxX) currentX = maxX; if(currentX < -20) currentX = -20; 
-                if(currentY > maxY) currentY = maxY; if(currentY < -20) currentY = -20;
-                xOffset = currentX; yOffset = currentY; hasMoved = true; setTranslate(currentX, currentY, fabBtn);
+                const maxX = window.innerWidth - rect.width - 15; 
+                const maxY = window.innerHeight - rect.height - 15;
+                if(currentX > maxX) currentX = maxX; if(currentX < -15) currentX = -15; 
+                if(currentY > maxY) currentY = maxY; if(currentY < -15) currentY = -15;
+                
+                xOffset = currentX; yOffset = currentY; 
+                setTranslate(currentX, currentY, fabBtn);
             }
         }
 
         function dragEnd(e) {
-            if(isDragging) { initialX = currentX; initialY = currentY; isDragging = false; localStorage.setItem('fabPosition', JSON.stringify({x: xOffset, y: yOffset})); }
+            if(isDragging) { 
+                initialX = currentX; initialY = currentY; 
+                isDragging = false; 
+                localStorage.setItem('fabPosition', JSON.stringify({x: xOffset, y: yOffset})); 
+            }
         }
         function setTranslate(xPos, yPos, el) { el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`; }
 
-        // Quản lý Menu
+
+        // ================= XỬ LÝ MENU & CLICK BÊN NGOÀI =================
         const sidebar = document.getElementById('sidebar'), iconMenu = document.getElementById('icon-menu'), sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        
         function toggleSidebar(forceClose = false) {
-            if (forceClose) sidebar.classList.remove('open'); else sidebar.classList.toggle('open');
+            if (forceClose) { sidebar.classList.remove('open'); } 
+            else { sidebar.classList.toggle('open'); }
+            
+            // Đổi icon và lớp phủ mờ
             if (sidebar.classList.contains('open')) {
-                sidebarBackdrop.classList.add('active'); fabBtn.classList.add('is-open');
+                sidebarBackdrop.classList.add('active'); 
+                fabBtn.classList.add('is-open');
                 iconMenu.innerHTML = `<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>`;
             } else {
-                sidebarBackdrop.classList.remove('active'); fabBtn.classList.remove('is-open');
+                sidebarBackdrop.classList.remove('active'); 
+                fabBtn.classList.remove('is-open');
                 iconMenu.innerHTML = `<path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>`;
             }
         }
-        fabBtn.addEventListener('click', (e) => { if (hasMoved) { hasMoved = false; return; } toggleSidebar(); });
+        
+        fabBtn.addEventListener('click', (e) => { 
+            if (hasMoved) { hasMoved = false; return; } // Nếu vừa kéo xong thì bỏ qua sự kiện click
+            toggleSidebar(); 
+        });
+        
         sidebarBackdrop.addEventListener('click', () => { toggleSidebar(true); });
 
-        // API Lấy dữ liệu
+
+        // ================= API FETCH (LẤY DỮ LIỆU TỪ GOOGLE SHEETS) =================
         const overlayScreen = document.getElementById('overlayScreen'), placeholderText = document.getElementById('placeholderText'), loadingSpinner = document.getElementById('loadingSpinner');
-        let dataLoaded = false;
 
         function loadAppData() {
-            if(dataLoaded) return; // Tránh fetch nhiều lần
+            if(dataLoaded) return; // Chỉ gọi 1 lần
+            
             const url = "https://script.google.com/macros/s/AKfycbzU2-uP0jUUia8w74BBQ7U78OUn3d_SE7cEd_LBZJbq2b2g4HCJyFRAOLKMU9p2zb0F/exec";
-            fetch(url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ "sheet": "Home", "action": "get" }) })
+            
+            fetch(url, { 
+                method: "POST", 
+                headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+                body: JSON.stringify({ "sheet": "Home", "action": "get" }) 
+            })
             .then(res => res.json())
             .then(data => {
-                dataLoaded = true; loadingSpinner.style.display = 'none';
+                dataLoaded = true; 
+                loadingSpinner.style.display = 'none';
                 if (data.status === "success" && data.all_data?.Home) {
                     renderList(data.all_data.Home);
-                    placeholderText.innerText = "Chọn một ứng dụng từ Menu";
-                } else { placeholderText.innerText = "Dữ liệu không hợp lệ."; }
+                    placeholderText.innerText = "Mời bạn chọn ứng dụng từ Menu";
+                } else { 
+                    placeholderText.innerText = "Dữ liệu trả về không hợp lệ."; 
+                }
             })
-            .catch(err => { loadingSpinner.style.display = 'none'; placeholderText.innerText = "Lỗi kết nối máy chủ!"; });
+            .catch(err => { 
+                loadingSpinner.style.display = 'none'; 
+                placeholderText.innerText = "Lỗi kết nối đến máy chủ Google!"; 
+                console.error("Lỗi:", err);
+            });
         }
 
+        // Tạo danh sách và bọc kỹ lọc lỗi URL
         function renderList(rows) {
             const listContainer = document.getElementById('webList');
             for (let i = 1; i < rows.length; i++) {
                 const tenWeb = rows[i].A, urlWeb = rows[i].B;
+                
+                // Lọc BỎ các mục trống hoặc url bị lỗi cú pháp
                 if (!tenWeb || !urlWeb || (!urlWeb.startsWith('http://') && !urlWeb.startsWith('https://'))) continue; 
 
-                const listItem = document.createElement('li'); listItem.innerText = tenWeb;
+                const listItem = document.createElement('li'); 
+                listItem.innerText = tenWeb;
+                
                 listItem.addEventListener('click', function() {
                     listContainer.querySelectorAll('li').forEach(item => item.classList.remove('active'));
-                    this.classList.add('active'); toggleSidebar(true); loadWeb(tenWeb, urlWeb);
+                    this.classList.add('active'); 
+                    
+                    toggleSidebar(true); // Đóng menu
+                    loadWeb(tenWeb, urlWeb); // Mở link
                 });
                 listContainer.appendChild(listItem);
             }
         }
 
+        // Hàm Nhúng web vào iframe
         function loadWeb(name, url) {
-            const iframe = document.getElementById('webFrame'); document.title = name;
-            if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-                overlayScreen.style.opacity = '0'; setTimeout(() => overlayScreen.style.display = 'none', 300); iframe.src = url;
+            const iframe = document.getElementById('webFrame'); 
+            document.title = name;
+            
+            if (url) {
+                overlayScreen.style.opacity = '0'; 
+                setTimeout(() => overlayScreen.style.display = 'none', 300); 
+                iframe.src = url;
             } else {
-                iframe.src = "about:blank"; overlayScreen.style.display = 'flex'; overlayScreen.style.opacity = '1';
-                loadingSpinner.style.display = 'none'; placeholderText.innerText = `URL lỗi: ${url}`;
+                iframe.src = "about:blank"; 
+                overlayScreen.style.display = 'flex'; 
+                overlayScreen.style.opacity = '1';
+                loadingSpinner.style.display = 'none'; 
+                placeholderText.innerText = `Lỗi: URL không xác định`;
             }
         }
     </script>
