@@ -4,8 +4,8 @@
   "description": "Kho ứng dụng cá nhân từ Google Sheets",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f5f6fa",
-  "theme_color": "#2c3e50",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/295/295118.png",
