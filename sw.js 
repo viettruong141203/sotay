@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dinh-truong-app-v2';
+const CACHE_NAME = 'dinh-truong-app-v3';
 const urlsToCache = [
   './index.html',
   './manifest.json'
@@ -17,11 +17,8 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
+        // Trả về dữ liệu từ cache nếu có, ngược lại thì gọi mạng
+        return response || fetch(event.request);
+      })
   );
 });
