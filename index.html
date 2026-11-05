@@ -35,7 +35,7 @@
             overscroll-behavior-y: contain; 
         }
 
-        /* ================= NÚT TẢI APP (CHỈ HIỆN KHI ANDROID CHO PHÉP) ================= */
+        /* ================= NÚT TẢI APP (CHỈ HIỆN KHI TRÌNH DUYỆT HỖ TRỢ) ================= */
         #installAppBtn {
             display: none; 
             position: fixed; bottom: 30px; right: 30px;
@@ -114,7 +114,7 @@
         <div class="content">
             <div id="overlayScreen" class="overlay-screen">
                 <div id="loadingSpinner" class="spinner"></div>
-                <div id="placeholderText" class="placeholder-text">Đang kết nối hệ thống...</div>
+                <div id="placeholderText" class="placeholder-text">Đang đồng bộ hệ thống...</div>
             </div>
             
             <iframe id="webFrame" src="about:blank" title="Giao diện Web"></iframe>
@@ -131,14 +131,14 @@
         // ================= BIẾN TOÀN CỤC =================
         let dataLoaded = false; 
 
-        // ================= ĐĂNG KÝ SERVICE WORKER (BẮT BUỘC ĐỂ PWA HOẠT ĐỘNG) =================
+        // ================= ĐĂNG KÝ SERVICE WORKER (BẮT BUỘC ĐỂ LÀM APP APK) =================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { 
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration failed:', err)); 
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('Lỗi đăng ký SW:', err)); 
             });
         }
 
-        // ================= XỬ LÝ NÚT TẢI APP ANDROID =================
+        // ================= XỬ LÝ NÚT TẢI APP PWA =================
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
         
@@ -161,20 +161,17 @@
             installBtn.style.display = 'none';
         });
 
-
         // ================= KÉO THẢ NÚT TRỢ LÝ ẢO =================
         const fabBtn = document.getElementById('fabBtn');
         let isDragging = false, hasMoved = false; 
         let currentX, currentY, initialX, initialY;
         let xOffset = 0, yOffset = 0;
 
-        // Khôi phục vị trí lưu
         const savedPos = JSON.parse(localStorage.getItem('fabPosition'));
         if (savedPos) { 
             xOffset = savedPos.x; yOffset = savedPos.y; setTranslate(xOffset, yOffset, fabBtn); 
         }
 
-        // Đăng ký sự kiện kéo
         fabBtn.addEventListener("touchstart", dragStart, { passive: false });
         fabBtn.addEventListener("touchend", dragEnd, { passive: false });
         fabBtn.addEventListener("touchmove", drag, { passive: false });
@@ -197,11 +194,10 @@
                 currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
                 currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
                 
-                // Thuật toán đo khoảng cách di chuyển để phân biệt Click và Drag
+                // Đo khoảng cách di chuyển để phân biệt Click và Drag
                 let moveDistance = Math.abs(currentX - xOffset) + Math.abs(currentY - yOffset);
                 if (moveDistance > 5) { hasMoved = true; }
                 
-                // Thuật toán giữ nút không lọt ra ngoài màn hình
                 const rect = fabBtn.getBoundingClientRect();
                 const maxX = window.innerWidth - rect.width - 15; 
                 const maxY = window.innerHeight - rect.height - 15;
@@ -230,7 +226,6 @@
             if (forceClose) { sidebar.classList.remove('open'); } 
             else { sidebar.classList.toggle('open'); }
             
-            // Đổi icon và lớp phủ mờ
             if (sidebar.classList.contains('open')) {
                 sidebarBackdrop.classList.add('active'); 
                 fabBtn.classList.add('is-open');
@@ -243,7 +238,7 @@
         }
         
         fabBtn.addEventListener('click', (e) => { 
-            if (hasMoved) { hasMoved = false; return; } // Nếu vừa kéo xong thì bỏ qua sự kiện click
+            if (hasMoved) { hasMoved = false; return; } 
             toggleSidebar(); 
         });
         
@@ -258,12 +253,13 @@
         function loadAppData() {
             if(dataLoaded) return; 
             
+            // THAY LINK NÀY BẰNG LINK GOOGLE APPS SCRIPT CỦA BẠN
             const url = "https://script.google.com/macros/s/AKfycbzU2-uP0jUUia8w74BBQ7U78OUn3d_SE7cEd_LBZJbq2b2g4HCJyFRAOLKMU9p2zb0F/exec";
             
             fetch(url, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain;charset=utf-8" }, 
-                redirect: "follow", // <-- BẮT BUỘC ĐỂ KHÔNG BỊ LỖI VỚI GOOGLE SCRIPT
+                redirect: "follow", // <-- RẤT QUAN TRỌNG ĐỂ KHÔNG BỊ CHẶN BỞI GOOGLE
                 body: JSON.stringify({ "sheet": "Home", "action": "get" }) 
             })
             .then(res => {
@@ -283,18 +279,18 @@
             })
             .catch(err => { 
                 loadingSpinner.style.display = 'none'; 
-                placeholderText.innerHTML = `<span style="color:#ef4444">Lỗi kết nối: ${err.message}</span><br><br><span style="font-size:13px;color:#94a3b8">Hãy kiểm tra lại Link Apps Script hoặc xem tab Console (F12)</span>`; 
+                placeholderText.innerHTML = `<span style="color:#ef4444">Lỗi kết nối: ${err.message}</span><br><br><span style="font-size:13px;color:#94a3b8">Hãy kiểm tra lại Link Apps Script, hoặc xem tab Console (F12)</span>`; 
                 console.error("Lỗi chi tiết:", err);
             });
         }
 
-        // Tự động gọi hàm lấy dữ liệu khi vừa mở trang (Đã mở khóa)
+        // Tự động gọi hàm lấy dữ liệu khi vừa mở trang
         document.addEventListener("DOMContentLoaded", () => {
-            toggleSidebar(false); // Mở menu luôn cho đẹp
+            toggleSidebar(false); // Mở menu lên luôn cho trực quan
             loadAppData();
         });
 
-        // Tạo danh sách (Bọc kỹ lọc lỗi URL)
+        // Tạo danh sách (Tự động ẩn các web trống hoặc lỗi URL)
         function renderList(rows) {
             const listContainer = document.getElementById('webList');
             for (let i = 1; i < rows.length; i++) {
