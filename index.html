@@ -35,16 +35,16 @@
             overscroll-behavior-y: contain; 
         }
 
-        /* ================= NÚT TẢI APP (CHỈ HIỆN KHI TRÌNH DUYỆT HỖ TRỢ) ================= */
+        /* ================= NÚT TẢI APP TRONG MENU ================= */
         #installAppBtn {
             display: none; 
-            position: fixed; bottom: 30px; right: 30px;
+            margin: 15px;
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white; border: none; padding: 14px 24px;
-            border-radius: 50px; font-size: 15px; font-weight: bold;
+            color: white; border: none; padding: 14px 20px;
+            border-radius: 12px; font-size: 15px; font-weight: bold;
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
             cursor: pointer; transition: transform 0.2s;
-            align-items: center; gap: 8px; z-index: 10000;
+            align-items: center; justify-content: center; gap: 8px;
         }
         #installAppBtn:active { transform: scale(0.95); }
 
@@ -63,7 +63,7 @@
         .sidebar { width: 0; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; white-space: nowrap; position: absolute; height: 100%; left: 0; top: 0; z-index: 900; }
         .sidebar.open { width: 280px; }
 
-        .web-list { list-style: none; padding: 40px 12px 20px 12px; margin: 0; overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
+        .web-list { list-style: none; padding: 40px 12px 10px 12px; margin: 0; overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
         .web-list::-webkit-scrollbar { display: none; }
         .web-list li { padding: 16px 20px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-muted); border: 1px solid transparent; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; }
         .web-list li::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-muted); transition: all 0.3s ease; }
@@ -103,6 +103,12 @@
         <!-- Sidebar Danh sách -->
         <div class="sidebar glass-panel" id="sidebar">
             <ul class="web-list" id="webList"></ul>
+            
+            <!-- NÚT TẢI APP TRONG MENU -->
+            <button id="installAppBtn">
+                <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                Cài Đặt App
+            </button>
         </div>
 
         <!-- Nút Trợ lý ảo (FAB) -->
@@ -117,16 +123,10 @@
                 <div id="placeholderText" class="placeholder-text">Đang đồng bộ hệ thống...</div>
             </div>
             
-            <!-- ĐÃ THÊM QUYỀN TRUY CẬP CLIPBOARD ĐỂ COPY/PASTE -->
-            <iframe id="webFrame" src="about:blank" title="Giao diện Web" allow="clipboard-read; clipboard-write; display-capture"></iframe>
+            <!-- CẤP FULL QUYỀN: CLIPBOARD, CAMERA, MICROPHONE, GEOLOCATION, FULLSCREEN... -->
+            <iframe id="webFrame" src="about:blank" title="Giao diện Web" allow="clipboard-read; clipboard-write; display-capture; camera; microphone; geolocation; fullscreen; autoplay; payment"></iframe>
         </div>
     </div>
-
-    <!-- Nút Tải Ứng Dụng -->
-    <button id="installAppBtn">
-        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        Cài Đặt App
-    </button>
 
     <script>
         // ================= BIẾN TOÀN CỤC =================
@@ -254,13 +254,12 @@
         function loadAppData() {
             if(dataLoaded) return; 
             
-            // THAY LINK NÀY BẰNG LINK GOOGLE APPS SCRIPT CỦA BẠN
             const url = "https://script.google.com/macros/s/AKfycbzU2-uP0jUUia8w74BBQ7U78OUn3d_SE7cEd_LBZJbq2b2g4HCJyFRAOLKMU9p2zb0F/exec";
             
             fetch(url, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain;charset=utf-8" }, 
-                redirect: "follow", // <-- RẤT QUAN TRỌNG ĐỂ KHÔNG BỊ CHẶN BỞI GOOGLE
+                redirect: "follow", 
                 body: JSON.stringify({ "sheet": "Home", "action": "get" }) 
             })
             .then(res => {
@@ -285,9 +284,8 @@
             });
         }
 
-        // Tự động gọi hàm lấy dữ liệu khi vừa mở trang
         document.addEventListener("DOMContentLoaded", () => {
-            toggleSidebar(false); // Mở menu lên luôn cho trực quan
+            toggleSidebar(false); 
             loadAppData();
         });
 
@@ -297,7 +295,6 @@
             for (let i = 1; i < rows.length; i++) {
                 const tenWeb = rows[i].A, urlWeb = rows[i].B;
                 
-                // Lọc BỎ các mục trống hoặc url bị lỗi cú pháp
                 if (!tenWeb || !urlWeb || (!urlWeb.startsWith('http://') && !urlWeb.startsWith('https://'))) continue; 
 
                 const listItem = document.createElement('li'); 
@@ -307,8 +304,8 @@
                     listContainer.querySelectorAll('li').forEach(item => item.classList.remove('active'));
                     this.classList.add('active'); 
                     
-                    toggleSidebar(true); // Đóng menu
-                    loadWeb(tenWeb, urlWeb); // Mở link
+                    toggleSidebar(true); 
+                    loadWeb(tenWeb, urlWeb); 
                 });
                 listContainer.appendChild(listItem);
             }
