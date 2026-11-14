@@ -2,7 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Thêm viewport-fit=cover để tràn viền trên các máy có tai thỏ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Đinh Trường</title>
     
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/295/295118.png">
@@ -13,7 +14,7 @@
     <meta name="theme-color" content="#0f172a">
     
     <style>
-        /* ================= BIẾN CSS & CẤU HÌNH GỐC ================= */
+        /* ================= BIẾN CSS & RESET ================= */
         :root {
             --glass-bg: rgba(15, 23, 42, 0.85);
             --glass-border: rgba(255, 255, 255, 0.1);
@@ -23,32 +24,27 @@
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0; 
+            padding: 0; 
+        }
 
         body, html {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0; padding: 0;
-            width: 100vw; height: 100vh;
+            width: 100vw; 
+            /* Fallback cho trình duyệt cũ */
+            height: 100vh; 
+            /* Trình duyệt hiện đại bám sát khung nhìn thực (không bị lẹm thanh địa chỉ) */
+            height: 100dvh; 
             overflow: hidden;
             background: var(--bg-gradient);
             color: var(--text-main);
             overscroll-behavior-y: contain; 
         }
 
-        /* ================= NÚT TẢI APP TRONG MENU ================= */
-        #installAppBtn {
-            display: none; 
-            margin: 15px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white; border: none; padding: 14px 20px;
-            border-radius: 12px; font-size: 15px; font-weight: bold;
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-            cursor: pointer; transition: transform 0.2s;
-            align-items: center; justify-content: center; gap: 8px;
-        }
-        #installAppBtn:active { transform: scale(0.95); }
-
-        /* ================= CSS CÁC THÀNH PHẦN BÊN TRONG APP ================= */
+        /* ================= BỐ CỤC CHÍNH ================= */
         #mainApp {
             width: 100%; height: 100%; position: relative; display: flex;
         }
@@ -59,11 +55,34 @@
         }
         .sidebar-backdrop.active { opacity: 1; visibility: visible; }
 
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-right: 1px solid var(--glass-border); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
-        .sidebar { width: 0; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; white-space: nowrap; position: absolute; height: 100%; left: 0; top: 0; z-index: 900; }
-        .sidebar.open { width: 280px; }
+        /* ================= SIDEBAR (DANH SÁCH MENU) ================= */
+        .glass-panel { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px); 
+            border-right: 1px solid var(--glass-border); 
+            box-shadow: 4px 0 24px rgba(0,0,0,0.5); 
+        }
+        
+        .sidebar { 
+            width: 0; display: flex; flex-direction: column; 
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            overflow: hidden; white-space: nowrap; position: absolute; 
+            height: 100%; left: 0; top: 0; z-index: 900; 
+            /* Đệm an toàn cho tai thỏ */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Chỉnh độ rộng theo thiết bị: Máy tính/Tablet rộng hơn, Điện thoại vừa đủ */
+        @media (max-width: 480px) {
+            .sidebar.open { width: 85vw; max-width: 300px; }
+        }
+        @media (min-width: 481px) {
+            .sidebar.open { width: 320px; }
+        }
 
-        .web-list { list-style: none; padding: 40px 12px 10px 12px; margin: 0; overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
+        .web-list { list-style: none; padding: 40px 12px 20px 12px; margin: 0; overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
         .web-list::-webkit-scrollbar { display: none; }
         .web-list li { padding: 16px 20px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-muted); border: 1px solid transparent; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; }
         .web-list li::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-muted); transition: all 0.3s ease; }
@@ -71,71 +90,86 @@
         .web-list li.active { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--text-main); }
         .web-list li.active::before { background-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
         
+        /* ================= IFRAME VÀ MÀN HÌNH CHỜ ================= */
         .content { flex-grow: 1; width: 100%; height: 100%; display: flex; position: relative; background-color: #ffffff; }
-        
         iframe { width: 100%; height: 100%; border: none; z-index: 1; }
         
         .overlay-screen { position: absolute; inset: 0; background: var(--bg-gradient); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.3s ease; }
         .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s ease-in-out infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .placeholder-text { color: var(--text-muted); font-size: 15px; text-align: center; max-width: 80%; line-height: 1.5; }
+        .placeholder-text { color: var(--text-muted); font-size: 15px; text-align: center; max-width: 80%; line-height: 1.5; padding: 0 20px; }
 
-        /* ================= NÚT TRỢ LÝ ẢO ================= */
+        /* ================= NÚT TRỢ LÝ ẢO KÉO THẢ ================= */
         .fab-btn {
-            position: fixed; top: 20px; left: 20px; z-index: 9999;
+            position: fixed; 
+            /* Tránh tai thỏ ở trên và viền cong */
+            top: max(20px, env(safe-area-inset-top)); 
+            left: max(20px, env(safe-area-inset-left)); 
+            z-index: 9999;
             background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%;
-            width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: background-color 0.2s, transform 0.1s; touch-action: none; cursor: grab;
+            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+            /* Transition không chứa transform để tránh giật khi kéo */
+            transition: background-color 0.2s, border-color 0.2s; 
+            touch-action: none; cursor: grab;
         }
-        .fab-btn:active { cursor: grabbing; transform: scale(0.95); }
-        .fab-btn svg { width: 22px; height: 22px; fill: currentColor; pointer-events: none; }
+        .fab-btn:active { cursor: grabbing; }
+        .fab-btn svg { width: 24px; height: 24px; fill: currentColor; pointer-events: none; }
         .fab-btn.is-open { background: rgba(220, 38, 38, 0.9); border-color: rgba(239, 68, 68, 0.6); }
+
+        /* ================= NÚT TẢI APP TRONG MENU ================= */
+        #installAppBtn {
+            display: none; 
+            margin: 15px;
+            margin-bottom: max(15px, env(safe-area-inset-bottom)); /* Bề mặt an toàn nút Home iOS */
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white; border: none; padding: 14px 20px;
+            border-radius: 12px; font-size: 15px; font-weight: bold;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            cursor: pointer; transition: transform 0.2s;
+            align-items: center; justify-content: center; gap: 8px;
+        }
+        #installAppBtn:active { transform: scale(0.95); }
+
     </style>
 </head>
 <body>
 
-    <!-- ================= TOÀN BỘ KHUNG GIAO DIỆN APP ================= -->
     <div id="mainApp">
-        <!-- Lớp phủ tối khi mở danh sách -->
         <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-        <!-- Sidebar Danh sách -->
         <div class="sidebar glass-panel" id="sidebar">
             <ul class="web-list" id="webList"></ul>
             
-            <!-- NÚT TẢI APP TRONG MENU -->
             <button id="installAppBtn">
                 <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                Cài Đặt App
+                Cài Đặt Ứng Dụng
             </button>
         </div>
 
-        <!-- Nút Trợ lý ảo (FAB) -->
         <div id="fabBtn" class="fab-btn">
             <svg id="icon-menu" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
         </div>
 
-        <!-- Khung hiển thị nội dung Web -->
         <div class="content">
             <div id="overlayScreen" class="overlay-screen">
                 <div id="loadingSpinner" class="spinner"></div>
                 <div id="placeholderText" class="placeholder-text">Đang đồng bộ hệ thống...</div>
             </div>
             
-            <!-- CẤP FULL QUYỀN: CLIPBOARD, CAMERA, MICROPHONE, GEOLOCATION, FULLSCREEN... -->
+            <!-- CẤP FULL QUYỀN ĐỂ ĐẢM BẢO CHẠY MƯỢT MỌI TÍNH NĂNG Ở CÁC TRÌNH DUYỆT -->
             <iframe id="webFrame" src="about:blank" title="Giao diện Web" allow="clipboard-read; clipboard-write; display-capture; camera; microphone; geolocation; fullscreen; autoplay; payment"></iframe>
         </div>
     </div>
 
     <script>
-        // ================= BIẾN TOÀN CỤC =================
         let dataLoaded = false; 
 
-        // ================= ĐĂNG KÝ SERVICE WORKER (BẮT BUỘC ĐỂ LÀM APP APK) =================
+        // ================= ĐĂNG KÝ SERVICE WORKER =================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { 
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('Lỗi đăng ký SW:', err)); 
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err)); 
             });
         }
 
@@ -152,7 +186,7 @@
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
+                await deferredPrompt.userChoice;
                 deferredPrompt = null;
                 installBtn.style.display = 'none';
             }
@@ -173,6 +207,7 @@
             xOffset = savedPos.x; yOffset = savedPos.y; setTranslate(xOffset, yOffset, fabBtn); 
         }
 
+        // Sự kiện vuốt và kéo
         fabBtn.addEventListener("touchstart", dragStart, { passive: false });
         fabBtn.addEventListener("touchend", dragEnd, { passive: false });
         fabBtn.addEventListener("touchmove", drag, { passive: false });
@@ -184,8 +219,7 @@
             initialX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOffset;
             initialY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOffset;
             if (e.target === fabBtn || fabBtn.contains(e.target)) { 
-                isDragging = true; 
-                hasMoved = false; 
+                isDragging = true; hasMoved = false; 
             }
         }
 
@@ -195,10 +229,10 @@
                 currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
                 currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
                 
-                // Đo khoảng cách di chuyển để phân biệt Click và Drag
                 let moveDistance = Math.abs(currentX - xOffset) + Math.abs(currentY - yOffset);
                 if (moveDistance > 5) { hasMoved = true; }
                 
+                // Thuật toán giữ nút không lọt ra ngoài khi kéo
                 const rect = fabBtn.getBoundingClientRect();
                 const maxX = window.innerWidth - rect.width - 15; 
                 const maxY = window.innerHeight - rect.height - 15;
@@ -217,10 +251,27 @@
                 localStorage.setItem('fabPosition', JSON.stringify({x: xOffset, y: yOffset})); 
             }
         }
+        
         function setTranslate(xPos, yPos, el) { el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`; }
 
+        // Tính năng Tự bám khung hình khi Xoay màn hình điện thoại (Portrait <-> Landscape)
+        window.addEventListener('resize', () => {
+            const rect = fabBtn.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width - 15;
+            const maxY = window.innerHeight - rect.height - 15;
+            let needUpdate = false;
+            
+            if (xOffset > maxX) { xOffset = maxX; needUpdate = true; }
+            if (yOffset > maxY) { yOffset = maxY; needUpdate = true; }
+            
+            if (needUpdate) {
+                setTranslate(xOffset, yOffset, fabBtn);
+                localStorage.setItem('fabPosition', JSON.stringify({x: xOffset, y: yOffset})); 
+            }
+        });
 
-        // ================= XỬ LÝ MENU & CLICK BÊN NGOÀI =================
+
+        // ================= XỬ LÝ MENU =================
         const sidebar = document.getElementById('sidebar'), iconMenu = document.getElementById('icon-menu'), sidebarBackdrop = document.getElementById('sidebarBackdrop');
         
         function toggleSidebar(forceClose = false) {
@@ -242,7 +293,6 @@
             if (hasMoved) { hasMoved = false; return; } 
             toggleSidebar(); 
         });
-        
         sidebarBackdrop.addEventListener('click', () => { toggleSidebar(true); });
 
 
@@ -279,8 +329,7 @@
             })
             .catch(err => { 
                 loadingSpinner.style.display = 'none'; 
-                placeholderText.innerHTML = `<span style="color:#ef4444">Lỗi kết nối: ${err.message}</span><br><br><span style="font-size:13px;color:#94a3b8">Hãy kiểm tra lại Link Apps Script, hoặc xem tab Console (F12)</span>`; 
-                console.error("Lỗi chi tiết:", err);
+                placeholderText.innerHTML = `<span style="color:#ef4444">Lỗi kết nối: ${err.message}</span><br><br><span style="font-size:13px;color:#94a3b8">Vui lòng kiểm tra lại đường truyền hoặc Google Apps Script</span>`; 
             });
         }
 
@@ -289,7 +338,7 @@
             loadAppData();
         });
 
-        // Tạo danh sách (Tự động ẩn các web trống hoặc lỗi URL)
+        // Tạo danh sách
         function renderList(rows) {
             const listContainer = document.getElementById('webList');
             for (let i = 1; i < rows.length; i++) {
@@ -311,7 +360,7 @@
             }
         }
 
-        // Hàm Nhúng web vào iframe
+        // Nhúng web vào iframe
         function loadWeb(name, url) {
             const iframe = document.getElementById('webFrame'); 
             document.title = name;
